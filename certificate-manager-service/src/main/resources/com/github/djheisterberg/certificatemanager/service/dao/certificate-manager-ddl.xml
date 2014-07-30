@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="create-certificate" author="djheisterberg">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="CERTIFICATE" />
+            </not>
+        </preConditions>
+        <createTable tableName="CERTIFICATE">
+            <column name="ALIAS" type="varchar(255)">
+                <constraints primaryKey="true"
+                    primaryKeyName="CERTIFICATE_PK" />
+            </column>
+            <column name="ISSUER" type="varchar(255)">
+                <constraints nullable="false" references="CERTIFICATE(ALIAS)"
+                    foreignKeyName="CERTIFICATE_CERTIFICATE_FK"
+                    deleteCascade="true" />
+            </column>
+            <column name="SUBJECT" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="NOT_BEFORE" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="NOT_AFTER" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="ALGORITHM" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="SALT" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="PRIVATE_KEY" type="varchar(8000)">
+                <constraints nullable="false" />
+            </column>
+            <column name="CERTIFICATE" type="varchar(8000)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-certificate_subject_ix" author="djheisterberg">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="CERTIFICATE"
+                    indexName="CERTIFICATE_SUBJECT_IX" />
+            </not>
+        </preConditions>
+        <createIndex tableName="CERTIFICATE" indexName="CERTIFICATE_SUBJECT_IX">
+            <column name="SUBJECT" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-certificate_not_before_ix" author="djheisterberg">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="CERTIFICATE"
+                    indexName="CERTIFICATE_NOT_BEFORE_IX" />
+            </not>
+        </preConditions>
+        <createIndex tableName="CERTIFICATE" indexName="CERTIFICATE_NOT_BEFORE_IX">
+            <column name="NOT_BEFORE" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-certificate_not_after_ix" author="djheisterberg">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="CERTIFICATE"
+                    indexName="CERTIFICATE_NOT_AFTER_IX" />
+            </not>
+        </preConditions>
+        <createIndex tableName="CERTIFICATE" indexName="CERTIFICATE_NOT_AFTER_IX">
+            <column name="NOT_AFTER" />
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
