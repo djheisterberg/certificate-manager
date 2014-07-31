@@ -18,58 +18,62 @@ import com.typesafe.config.ConfigFactory
 import org.junit.Assert
 import org.junit.Test
 
-package com.github.djheisterberg.certificatemanager.service.dao {
+package com.github.djheisterberg.certificatemanager {
+  import service.CertificateInfo
 
-  class CertificateManagerDAOImplTest {
+  package service.dao {
 
-    private val DB_CONFIG_PATH = "certificate_manager_db"
-    private val DDL_PATH = "com/github/djheisterberg/certificatemanager/service/dao/certificate-manager-ddl.xml"
+    class CertificateManagerDAOImplTest {
 
-    private implicit val waitTime = 2.seconds
+      private val DB_CONFIG_PATH = "certificate_manager_db"
+      private val DDL_PATH = "com/github/djheisterberg/certificatemanager/service/dao/certificate-manager-ddl.xml"
 
-    private def sync[A](op: => Awaitable[A])(implicit wait: Duration): A = {
-      Await.result(op, wait)
-    }
+      private implicit val waitTime = 2.seconds
 
-    private def getDAO(): CertificateManagerDAO = {
-      val config = ConfigFactory.load()
-      val dbConfig = config.getConfig(DB_CONFIG_PATH)
-      val dataSource = HikariCPDataSourceFactory(dbConfig)
+      private def sync[A](op: => Awaitable[A])(implicit wait: Duration): A = {
+        Await.result(op, wait)
+      }
 
-      val dataSourceOp = new DataSourceOp(dataSource)
-      dataSourceOp(LiquibaseRunner(DDL_PATH))
-      val profile = dataSourceOp(SlickProfiler.apply).get
+      private def getDAO(): CertificateManagerDAO = {
+        val config = ConfigFactory.load()
+        val dbConfig = config.getConfig(DB_CONFIG_PATH)
+        val dataSource = HikariCPDataSourceFactory(dbConfig)
 
-      val dao = new CertificateManagerDAOImpl(dataSource, profile, ExecutionContext.global)
-      dao
-    }
+        val dataSourceOp = new DataSourceOp(dataSource)
+        dataSourceOp(LiquibaseRunner(DDL_PATH))
+        val profile = dataSourceOp(SlickProfiler.apply).get
 
-    @Test
-    def testCRUD() {
-      val dao = getDAO()
-      Assert.assertNotNull(dao)
+        val dao = new CertificateManagerDAOImpl(dataSource, profile, ExecutionContext.global)
+        dao
+      }
 
-      val authCert = CertificateEntity("authAlias", "authAlias", "authSubject", new Timestamp(System.currentTimeMillis), new Timestamp(Long.MaxValue), "algorithm", "salt", "authPK", "authCert")
-      val endCert = CertificateEntity("endAlias", "authAlias", "endSubject", authCert.notBefore, authCert.notAfter, "algorithm", "salt", "endPK", "endCert")
+      @Test
+      def testCRUD() {
+        val dao = getDAO()
+        Assert.assertNotNull(dao)
 
-      sync(dao.createCertificate(authCert))
-      sync(dao.createCertificate(endCert))
+        val authCert = CertificateEntity("authAlias", "authAlias", "authSubject", new Timestamp(System.currentTimeMillis), new Timestamp(Long.MaxValue), "algorithm", "salt", "authPK", "authCert")
+        val endCert = CertificateEntity("endAlias", "authAlias", "endSubject", authCert.notBefore, authCert.notAfter, "algorithm", "salt", "endPK", "endCert")
 
-      Assert.assertEquals("auth cert", authCert, sync(dao.getCertificate(authCert.alias)).get)
-      Assert.assertEquals("end cert", endCert, sync(dao.getCertificate(endCert.alias)).get)
+        sync(dao.createCertificate(authCert))
+        sync(dao.createCertificate(endCert))
 
-      val roots = sync(dao.getRoots())
-      Assert.assertEquals("1 root", 1, roots.size)
-      Assert.assertEquals("root", (authCert.alias, authCert.issuerAlias, authCert.subject, authCert.notBefore, authCert.notAfter), roots.head)
+        Assert.assertEquals("auth cert", authCert, sync(dao.getCertificate(authCert.alias)).get)
+        Assert.assertEquals("end cert", endCert, sync(dao.getCertificate(endCert.alias)).get)
 
-      val issued = sync(dao.getIssued(authCert.alias))
-      Assert.assertEquals("1 issued", 1, issued.size)
-      Assert.assertEquals("issued", (endCert.alias, endCert.issuerAlias, endCert.subject, endCert.notBefore, endCert.notAfter), issued.head)
+        val roots = sync(dao.getRoots())
+        Assert.assertEquals("1 root", 1, roots.size)
+        Assert.assertEquals("root", CertificateInfo(authCert.alias, authCert.issuerAlias, authCert.subject, authCert.notBefore, authCert.notAfter), roots.head)
 
-      val nDelete = sync(dao.deleteCertificate(authCert.alias))
-      Assert.assertEquals("1 delete", 1, nDelete)
-      Assert.assertEquals("no auth cert", None, sync(dao.getCertificate(authCert.alias)))
-      Assert.assertEquals("no end cert", None, sync(dao.getCertificate(endCert.alias)))
+        val issued = sync(dao.getIssued(authCert.alias))
+        Assert.assertEquals("1 issued", 1, issued.size)
+        Assert.assertEquals("issued", CertificateInfo(endCert.alias, endCert.issuerAlias, endCert.subject, endCert.notBefore, endCert.notAfter), issued.head)
+
+        val nDelete = sync(dao.deleteCertificate(authCert.alias))
+        Assert.assertEquals("1 delete", 1, nDelete)
+        Assert.assertEquals("no auth cert", None, sync(dao.getCertificate(authCert.alias)))
+        Assert.assertEquals("no end cert", None, sync(dao.getCertificate(endCert.alias)))
+      }
     }
   }
 }

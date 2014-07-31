@@ -6,31 +6,35 @@ import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.StaticQuery
 import scala.slick.jdbc.StaticQuery.interpolation
 
-package com.github.djheisterberg.certificatemanager.service.dao {
+package com.github.djheisterberg.certificatemanager {
+  import service.CertificateInfo
 
-  class CertificateManagerDAOImpl(dataSource: DataSource, override protected val profile: JdbcProfile, implicit private val executionContext: ExecutionContext) extends CertificateManagerDAO {
+  package service.dao {
 
-    import profile.simple._
+    class CertificateManagerDAOImpl(dataSource: DataSource, override protected val profile: JdbcProfile, implicit private val executionContext: ExecutionContext) extends CertificateManagerDAO {
 
-    override protected val database = Database.forDataSource(dataSource)
+      import profile.simple._
 
-    private def certInfo(c: CertificateTable) = (c.alias, c.issuerAlias, c.subject, c.notBefore, c.notAfter)
+      override protected val database = Database.forDataSource(dataSource)
 
-    override def createCertificate(certificate: CertificateEntity): Future[Unit] =
-      futureInTransaction { implicit session => certificateTable += certificate }
+      override def createCertificate(certificate: CertificateEntity): Future[Unit] =
+        futureInTransaction { implicit session => certificateTable += certificate }
 
-    override def getCertificate(alias: String): Future[Option[CertificateEntity]] =
-      futureInSession { implicit session => certificateTable.filter(_.alias === alias).firstOption }
+      override def getCertificate(alias: String): Future[Option[CertificateEntity]] =
+        futureInSession { implicit session => certificateTable.filter(_.alias === alias).firstOption }
 
-    override def deleteCertificate(alias: String): Future[Int] =
-      futureInTransaction { implicit session => certificateTable.filter(_.alias === alias).delete }
+      override def deleteCertificate(alias: String): Future[Int] =
+        futureInTransaction { implicit session => certificateTable.filter(_.alias === alias).delete }
 
-    override def getRoots(): Future[Seq[CertInfo]] =
-      futureInSession { implicit session => certificateTable.filter(c => c.issuerAlias === c.alias).map(certInfo).run }
+      override def getRoots(): Future[Seq[CertificateInfo]] =
+        futureInSession { implicit session =>
+          certificateTable.filter(c => c.issuerAlias === c.alias).run map certificateInfo
+        }
 
-    override def getIssued(issuerAlias: String): Future[Seq[CertInfo]] =
-      futureInSession { implicit session =>
-        certificateTable.filter(c => (c.issuerAlias === issuerAlias) && (c.issuerAlias =!= c.alias)).map(certInfo).run
-      }
+      override def getIssued(issuerAlias: String): Future[Seq[CertificateInfo]] =
+        futureInSession { implicit session =>
+          certificateTable.filter(c => (c.issuerAlias === issuerAlias) && (c.issuerAlias =!= c.alias)).run map certificateInfo
+        }
+    }
   }
 }
