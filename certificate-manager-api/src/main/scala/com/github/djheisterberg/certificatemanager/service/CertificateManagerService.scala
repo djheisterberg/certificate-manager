@@ -17,7 +17,7 @@ package com.github.djheisterberg.certificatemanager {
 
       def getRootInfo(): Future[Seq[CertificateInfo]]
 
-      def getIssuedInfo(alias: String): Future[Seq[CertificateInfo]]
+      def getIssuedInfo(issuerAlias: String): Future[Seq[CertificateInfo]]
 
       def createRootCertificate(alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
         keyAlgorithm: String, keyParam: KeyParam, sigAlgorithm: String, notBefore: Date, notAfter: Date): Future[X509Certificate]

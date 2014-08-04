@@ -42,9 +42,9 @@ package com.github.djheisterberg.certificatemanager {
       override def getCertificate(alias: String): Future[Option[X509Certificate]] =
         dao.getCertificate(alias) map { _ map recoverCertificate }
 
-      override def getRootInfo(): Future[Seq[CertificateInfo]] = ???
+      override def getRootInfo(): Future[Seq[CertificateInfo]] = dao.getRoots()
 
-      override def getIssuedInfo(alias: String): Future[Seq[CertificateInfo]] = ???
+      override def getIssuedInfo(issuerAlias: String): Future[Seq[CertificateInfo]] = dao.getIssued(issuerAlias)
 
       override def createRootCertificate(alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
         keyAlgorithm: String, keyParam: KeyParam, sigAlgorithm: String, notBefore: Date, notAfter: Date): Future[X509Certificate] = {
@@ -63,22 +63,25 @@ package com.github.djheisterberg.certificatemanager {
         alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
         keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate] = {
 
-        val issuerInfo = dao.getCertificate(issuerAlias) map requireIssuerInfo(issuerAlias, issuerPassword)
-
-        val subjectX500 = new X500Principal(subject)
-        val keyPair = generateKeyPair(keyAlgorithm, keyParam)
-
         createNonRootCertificate(CertificateBuilder.buildSignerCertificate, issuerAlias, issuerPassword, alias, password, subject, alternativeName,
           keyAlgorithm, keyParam, notBefore, notAfter)
       }
 
       override def createServerCertificate(issuerAlias: String, issuerPassword: Array[Char],
         alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
-        keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate] = ???
+        keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate] = {
+
+        createNonRootCertificate(CertificateBuilder.buildServerCertificate, issuerAlias, issuerPassword, alias, password, subject, alternativeName,
+          keyAlgorithm, keyParam, notBefore, notAfter)
+      }
 
       override def createClientCertificate(issuerAlias: String, issuerPassword: Array[Char],
         alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
-        keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate] = ???
+        keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate] = {
+
+        createNonRootCertificate(CertificateBuilder.buildClientCertificate, issuerAlias, issuerPassword, alias, password, subject, alternativeName,
+          keyAlgorithm, keyParam, notBefore, notAfter)
+      }
 
       private def createNonRootCertificate(builder: NonRootCertificateBuilder, issuerAlias: String, issuerPassword: Array[Char],
         alias: String, password: Array[Char], subject: String, alternativeName: Option[String],

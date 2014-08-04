@@ -53,6 +53,39 @@ package com.github.djheisterberg.certificatemanager {
         val signerCertificateX = sync(certMgrSvc.getCertificate(signerAlias)).get
         Assert.assertEquals("signer certificate", signerCertificate, signerCertificateX)
         val signerPrivateKey = sync(certMgrSvc.getPrivateKey(signerAlias, signerPassword)).get
+
+        val serverAlias = "server"
+        val serverPassword = serverAlias.toCharArray
+        val serverSubject = subjectBase + serverAlias
+
+        val serverCertificate = sync(certMgrSvc.createServerCertificate(signerAlias, signerPassword, serverAlias, serverPassword, serverSubject, None,
+          keyAlgorithm, keyParam, notBefore, notAfter))
+        val serverCertificateX = sync(certMgrSvc.getCertificate(serverAlias)).get
+        Assert.assertEquals("server certificate", serverCertificate, serverCertificateX)
+        val serverPrivateKey = sync(certMgrSvc.getPrivateKey(serverAlias, serverPassword)).get
+
+        val clientAlias = "client"
+        val clientPassword = clientAlias.toCharArray
+        val clientSubject = subjectBase + clientAlias
+
+        val clientCertificate = sync(certMgrSvc.createServerCertificate(signerAlias, signerPassword, clientAlias, clientPassword, clientSubject, None,
+          keyAlgorithm, keyParam, notBefore, notAfter))
+        val clientCertificateX = sync(certMgrSvc.getCertificate(clientAlias)).get
+        Assert.assertEquals("client certificate", clientCertificate, clientCertificateX)
+        val clientPrivateKey = sync(certMgrSvc.getPrivateKey(clientAlias, clientPassword)).get
+
+        val rootInfos = sync(certMgrSvc.getRootInfo())
+        Assert.assertEquals("1 root", 1, rootInfos.size)
+        val rootInfo = rootInfos.head
+        Assert.assertEquals("root alias", rootAlias, rootInfo.alias)
+
+        val rootIssuedInfos = sync(certMgrSvc.getIssuedInfo(rootAlias))
+        Assert.assertEquals("1 issued by root", 1, rootIssuedInfos.size)
+        val rootIssuedInfo = rootIssuedInfos.head
+        Assert.assertEquals("root issued alias", signerAlias, rootIssuedInfo.alias)
+
+        val signerIssuedInfos = sync(certMgrSvc.getIssuedInfo(signerAlias))
+        Assert.assertEquals("2 issued by signer", 2, signerIssuedInfos.size)
       }
     }
   }
