@@ -29,12 +29,23 @@ package com.github.djheisterberg.certificatemanager {
       val endKeyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment)
       val serverExtendedKeyUsage = new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth)
 
-      def buildSignerCertificate(issuer: Option[X509Certificate], subject: X500Principal, alternativeName: Option[String], notBefore: Date, notAfter: Date, publicKey: PublicKey): JcaX509v3CertificateBuilder = {
+      def buildRootCertificate(subject: X500Principal, alternativeName: Option[String], notBefore: Date, notAfter: Date, publicKey: PublicKey): JcaX509v3CertificateBuilder = {
         val serialNumber = CertificateIdentifier.generateSerialNumber()
 
-        val issuerX500 = issuer.map(_.getSubjectX500Principal).getOrElse(subject)
+        val certificateBuilder = new JcaX509v3CertificateBuilder(subject, serialNumber, notBefore, notAfter, subject, publicKey)
 
-        val certificateBuilder = new JcaX509v3CertificateBuilder(issuerX500, serialNumber, notBefore, notAfter, subject, publicKey)
+        finishSignerCertificate(certificateBuilder, alternativeName, publicKey)
+      }
+
+      def buildSignerCertificate(issuer: X509Certificate, subject: X500Principal, alternativeName: Option[String], notBefore: Date, notAfter: Date, publicKey: PublicKey): JcaX509v3CertificateBuilder = {
+        val serialNumber = CertificateIdentifier.generateSerialNumber()
+
+        val certificateBuilder = new JcaX509v3CertificateBuilder(issuer, serialNumber, notBefore, notAfter, subject, publicKey)
+
+        finishSignerCertificate(certificateBuilder, alternativeName, publicKey)
+      }
+
+      def finishSignerCertificate(certificateBuilder: JcaX509v3CertificateBuilder, alternativeName: Option[String], publicKey: PublicKey): JcaX509v3CertificateBuilder = {
         addExtensions(certificateBuilder, true, false, alternativeName)
         certificateBuilder.addExtension(Extension.subjectKeyIdentifier, false, CertificateIdentifier.generateSubjectKeyIdentifier(publicKey))
 

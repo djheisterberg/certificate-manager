@@ -9,28 +9,30 @@ package com.github.djheisterberg.certificatemanager {
 
     trait CertificateManagerService {
 
-      def getPrivateKey(alias: String, password: Array[Char]): Future[PrivateKey]
+      type KeyParam = Either[Int, String]
 
-      def getCertificate(alias: String): Future[X509Certificate]
+      def getPrivateKey(alias: String, password: Array[Char]): Future[Option[PrivateKey]]
+
+      def getCertificate(alias: String): Future[Option[X509Certificate]]
 
       def getRootInfo(): Future[Seq[CertificateInfo]]
 
       def getIssuedInfo(alias: String): Future[Seq[CertificateInfo]]
 
-      def createAuthorityCertificate(alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
-        keyAlgorithm: String, keySize: Int, sigAlgorithm: String, notBefore: Date, notAfter: Date): Future[X509Certificate]
+      def createRootCertificate(alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
+        keyAlgorithm: String, keyParam: KeyParam, sigAlgorithm: String, notBefore: Date, notAfter: Date): Future[X509Certificate]
 
-      def createAuthorityCertificate(issuerAlias: String, issuerPassword: Array[Char],
+      def createSignerCertificate(issuerAlias: String, issuerPassword: Array[Char],
         alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
-        keyAlgorithm: String, keySize: Int, notBefore: Date, notAfter: Date): Future[X509Certificate]
+        keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate]
 
       def createServerCertificate(issuerAlias: String, issuerPassword: Array[Char],
         alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
-        keyAlgorithm: String, keySize: Int, notBefore: Date, notAfter: Date): Future[X509Certificate]
+        keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate]
 
       def createClientCertificate(issuerAlias: String, issuerPassword: Array[Char],
         alias: String, password: Array[Char], subject: String, alternativeName: Option[String],
-        keyAlgorithm: String, keySize: Int, notBefore: Date, notAfter: Date): Future[X509Certificate]
+        keyAlgorithm: String, keyParam: KeyParam, notBefore: Date, notAfter: Date): Future[X509Certificate]
     }
   }
 }

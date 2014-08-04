@@ -10,21 +10,24 @@ import org.junit.Test
 package com.github.djheisterberg.certificatemanager {
   package util {
 
-    class CertificateBuilderTest extends CertificateBuilderTestHelper with KeyPairGenerationTestHelper {
+    class CertificateBuilderTest extends CertificateBuilderTestHelper {
+
+      val rootKeyPair = rsaKeyPairGenerator.generateKeyPair()
+      val rootCertificate = buildRootCertificate(rootKeyPair, CryptUtil.rsaSignatureAlgorithm)
 
       @Test
       def testRootCertificateRSA() {
-        testRootCertificate(rsaKeyPairGenerator, rsaSignatureAlgorithm)
+        testRootCertificate(rsaKeyPairGenerator, CryptUtil.rsaSignatureAlgorithm)
       }
 
       @Test
       def testRootCertificateDSA() {
-        testRootCertificate(dsaKeyPairGenerator, dsaSignatureAlgorithm)
+        testRootCertificate(dsaKeyPairGenerator, CryptUtil.dsaSignatureAlgorithm)
       }
 
       @Test
       def testRootCertificateEC() {
-        testRootCertificate(ecKeyPairGenerator, ecSignatureAlgorithm)
+        testRootCertificate(ecKeyPairGenerator, CryptUtil.ecSignatureAlgorithm)
       }
 
       private def testRootCertificate(keyPairGenerator: KeyPairGenerator, signatureAlgorithm: String) {
@@ -36,21 +39,21 @@ package com.github.djheisterberg.certificatemanager {
       @Test
       def testSignerCertificate() {
         val keyPair = rsaKeyPairGenerator.generateKeyPair()
-        val signerCertificate = buildSignerCertificate(None, keyPair, rsaSignatureAlgorithm)
+        val signerCertificate = buildSignerCertificate(rootCertificate, keyPair.getPublic, rootKeyPair.getPrivate)
         verifyCertificate(signerCertificate, rootSubject, signerSubject, signerAlias, true, false)
       }
 
       @Test
       def testServerCertificate() {
         val keyPair = rsaKeyPairGenerator.generateKeyPair()
-        val serverCertificate = buildServerCertificate(None, keyPair, rsaSignatureAlgorithm)
+        val serverCertificate = buildServerCertificate(rootCertificate, keyPair.getPublic, rootKeyPair.getPrivate)
         verifyCertificate(serverCertificate, rootSubject, serverSubject, serverAlias, false, true)
       }
 
       @Test
       def testClientCertificate() {
         val keyPair = rsaKeyPairGenerator.generateKeyPair()
-        val clientCertificate = buildClientCertificate(None, keyPair, rsaSignatureAlgorithm)
+        val clientCertificate = buildClientCertificate(rootCertificate, keyPair.getPublic, rootKeyPair.getPrivate)
         verifyCertificate(clientCertificate, rootSubject, clientSubject, clientAlias, false, false)
       }
 

@@ -35,6 +35,17 @@ package com.github.djheisterberg.certificatemanager {
 
     object CryptUtil {
 
+      val rsaAlgorithm = "RSA"
+      val rsaKeySize = 2048
+      val dsaAlgorithm = "DSA"
+      val dsaKeySize = 1024
+      val ecAlgorithm = "EC"
+      val ecName = "SECP256R1"
+
+      val rsaSignatureAlgorithm = "SHA256withRSA"
+      val dsaSignatureAlgorithm = "SHA1withDSA"
+      val ecSignatureAlgorithm = "SHA256withECDSA"
+
       private val passwordHashAlgorithm = "SHA-256"
       private val cipherType = "AES"
       private val cipherMode = "CBC"

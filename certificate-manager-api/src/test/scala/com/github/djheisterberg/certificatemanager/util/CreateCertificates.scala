@@ -41,7 +41,7 @@ package com.github.djheisterberg.certificatemanager.util {
       val rootPrivateKey = rootKeyPair.getPrivate
       val rootPublicKey = rootKeyPair.getPublic
 
-      val rootCertificateBuilder = CertificateBuilder.buildSignerCertificate(None, rootSubject, rootAlternativeName, notBefore, notAfter, rootPublicKey)
+      val rootCertificateBuilder = CertificateBuilder.buildRootCertificate(rootSubject, rootAlternativeName, notBefore, notAfter, rootPublicKey)
       val rootCertificate = CertificateBuilder.signCertificate(rootCertificateBuilder, signatureAlgorithm, rootPrivateKey)
 
       val rootKeyStore = KeyStore.getInstance(KeyStore.getDefaultType)

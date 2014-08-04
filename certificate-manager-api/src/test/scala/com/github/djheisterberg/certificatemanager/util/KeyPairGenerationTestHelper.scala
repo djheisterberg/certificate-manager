@@ -7,22 +7,15 @@ package com.github.djheisterberg.certificatemanager {
 
     trait KeyPairGenerationTestHelper {
 
-      protected val rsaAlgorithm = "RSA"
-      protected val rsaKeySize = 2048
-      protected val dsaAlgorithm = "DSA"
-      protected val dsaKeySize = 1024
-      protected val ecAlgorithm = "EC"
-      protected val ecName = "SECP256R1"
+      protected val rsaKeyPairGenerator = KeyPairGenerator.getInstance(CryptUtil.rsaAlgorithm)
+      rsaKeyPairGenerator.initialize(CryptUtil.rsaKeySize)
 
-      protected val rsaKeyPairGenerator = KeyPairGenerator.getInstance(rsaAlgorithm)
-      rsaKeyPairGenerator.initialize(rsaKeySize)
+      protected val dsaKeyPairGenerator = KeyPairGenerator.getInstance(CryptUtil.dsaAlgorithm)
+      dsaKeyPairGenerator.initialize(CryptUtil.dsaKeySize)
 
-      protected val dsaKeyPairGenerator = KeyPairGenerator.getInstance(dsaAlgorithm)
-      dsaKeyPairGenerator.initialize(dsaKeySize)
-
-      protected val bcCurveSpec = ECNamedCurveTable.getParameterSpec(ecName)
+      protected val bcCurveSpec = ECNamedCurveTable.getParameterSpec(CryptUtil.ecName)
       protected val ecSpec = CryptUtil.convertBCECSpec(bcCurveSpec)
-      protected val ecKeyPairGenerator = KeyPairGenerator.getInstance(ecAlgorithm)
+      protected val ecKeyPairGenerator = KeyPairGenerator.getInstance(CryptUtil.ecAlgorithm)
       ecKeyPairGenerator.initialize(ecSpec)
     }
   }
