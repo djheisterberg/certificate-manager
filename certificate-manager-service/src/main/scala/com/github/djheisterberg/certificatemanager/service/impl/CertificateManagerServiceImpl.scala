@@ -17,8 +17,7 @@ import org.bouncycastle.jce.ECNamedCurveTable
 
 package com.github.djheisterberg.certificatemanager {
 
-  import service.CertificateInfo
-  import service.CertificateManagerService
+  import service._
   import service.dao.CertificateEntity
   import service.dao.CertificateManagerDAO
   import util.CertificateBuilder
@@ -37,7 +36,7 @@ package com.github.djheisterberg.certificatemanager {
       private val random = new SecureRandom
 
       override def getPrivateKey(alias: String, password: Array[Char]): Future[Option[PrivateKey]] =
-        dao.getCertificate(alias) map { _ map recoverPrivateKey(password) }
+        dao.getCertificate(alias) map { _ map recoverPrivateKey(alias, password) }
 
       override def getCertificate(alias: String): Future[Option[X509Certificate]] =
         dao.getCertificate(alias) map { _ map recoverCertificate }
@@ -128,17 +127,19 @@ package com.github.djheisterberg.certificatemanager {
         certificateOption match {
           case Some(certificateEntity) => {
             val certificate = recoverCertificate(certificateEntity)
-            IssuerInfo(issuerAlias, certificate, recoverPrivateKey(password)(certificateEntity))
+            IssuerInfo(issuerAlias, certificate, recoverPrivateKey(issuerAlias, password)(certificateEntity))
           }
-          case None => throw new RuntimeException(s"No issuer certificate for '${issuerAlias}'")
+          case None => throw new NoIssuerException(issuerAlias, s"No issuer certificate for '${issuerAlias}'")
         }
       }
 
-      private def recoverPrivateKey(password: Array[Char])(certificateEntity: CertificateEntity) = {
+      private def recoverPrivateKey(alias: String, password: Array[Char])(certificateEntity: CertificateEntity) = {
         val salt = CryptUtil.decodeBase64(certificateEntity.salt)
         val algorithm = certificateEntity.algorithm
         val privateKeyString = certificateEntity.privateKey
-        CryptUtil.decryptPrivateKey(password, salt, algorithm, privateKeyString)
+        try {
+          CryptUtil.decryptPrivateKey(password, salt, algorithm, privateKeyString)
+        } catch { case e: Exception => throw new BadPrivateKeyPasswordException(alias, e) }
       }
 
       private def recoverCertificate(certificateEntity: CertificateEntity) = CryptUtil.decodeCertificate(certificateEntity.certificate)

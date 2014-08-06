@@ -23,6 +23,11 @@ package com.github.djheisterberg.certificatemanager.service {
 
       val certificatesByIssuer = Map[String, Set[CertificateEntity]]()
 
+      def clear() {
+        certificatesByAlias.clear()
+        certificatesByIssuer.clear()
+      }
+
       override def createCertificate(certificate: CertificateEntity): Future[Unit] = {
         val alias = certificate.alias
         if (certificatesByAlias contains alias) throw new SQLException("PK violation")
