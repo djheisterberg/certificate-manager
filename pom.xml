@@ -22,6 +22,8 @@
         <commons-dbcp.version>2.0.1</commons-dbcp.version>
         <hikari.version>1.4.0</hikari.version>
         <h2.version>1.4.179</h2.version>
+        <vertx.version>2.1</vertx.version>
+        <vertx-scala.version>1.0.0</vertx-scala.version>
     </properties>
 
     <build>
@@ -97,6 +99,26 @@
                 <version>${liquibase-slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-platform</artifactId>
+                <version>${vertx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>lang-scala</artifactId>
+                <version>${vertx-scala.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-compiler</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-library</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>com.jolbox</groupId>
                 <artifactId>bonecp</artifactId>
                 <version>${bonecp.version}</version>
@@ -159,5 +181,6 @@
     <modules>
         <module>certificate-manager-api</module>
         <module>certificate-manager-service</module>
+        <module>certificate-manager-rest</module>
     </modules>
 </project>
