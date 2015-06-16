@@ -40,7 +40,7 @@ package com.github.djheisterberg.certificatemanager {
       val dsaAlgorithm = "DSA"
       val dsaKeySize = 1024
       val ecAlgorithm = "EC"
-      val ecName = "SECP256R1"
+      val ecName = "SECT283K1"
 
       val rsaSignatureAlgorithm = "SHA256withRSA"
       val dsaSignatureAlgorithm = "SHA1withDSA"
@@ -150,7 +150,7 @@ package com.github.djheisterberg.certificatemanager {
           }
         val curve = new EllipticCurve(ecField, ecA, ecB)
         val bcG = bcCurveSpec.getG
-        val ecG = new ECPoint(bcG.getX.toBigInteger, bcG.getY.toBigInteger)
+        val ecG = new ECPoint(bcG.getAffineXCoord.toBigInteger, bcG.getAffineYCoord.toBigInteger)
         val ecN = bcCurveSpec.getN
         val ecH = bcCurveSpec.getH.intValue
         new ECParameterSpec(curve, ecG, ecN, ecH)

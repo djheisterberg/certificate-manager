@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.github.djheisterberg.certificate-manager</groupId>
         <artifactId>certificate-manager_2.11</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
     <artifactId>certificate-manager-service_2.11</artifactId>
     <packaging>bundle</packaging>
@@ -39,10 +39,6 @@
         <dependency>
             <groupId>com.mattbertolini</groupId>
             <artifactId>liquibase-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.mchange</groupId>
-            <artifactId>c3p0</artifactId>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
