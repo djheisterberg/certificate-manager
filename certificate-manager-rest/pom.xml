@@ -6,7 +6,7 @@
         <artifactId>certificate-manager_2.11</artifactId>
         <version>0.0.2-SNAPSHOT</version>
     </parent>
-    <artifactId>certificate-manager-rest</artifactId>
+    <artifactId>certificate-manager-rest_2.11</artifactId>
     <packaging>bundle</packaging>
 
     <build>
@@ -35,6 +35,10 @@
         <dependency>
             <groupId>com.github.djheisterberg.fruhling</groupId>
             <artifactId>fruhling-db_${scala.major}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.djheisterberg.fruhling</groupId>
+            <artifactId>fruhling-rest_${scala.major}</artifactId>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>

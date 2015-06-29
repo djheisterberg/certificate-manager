@@ -75,6 +75,11 @@
                 <version>${fruhling.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.github.djheisterberg.fruhling</groupId>
+                <artifactId>fruhling-rest_${scala.major}</artifactId>
+                <version>${fruhling.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk15on</artifactId>
                 <version>${bc.version}</version>
